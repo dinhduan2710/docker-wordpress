@@ -1,41 +1,43 @@
 version: "3"
 services:
   #MySQL Database image
-  my_database:
+  mysql_wordpress:
     image: mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: my_password_1234789
-      MYSQL_DATABASE: my_wp_database
-      MYSQL_USER: my_wp_user
-      MYSQL_PASSWORD: my_wp_user_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
     volumes:
       - mysql:/var/lib/mysql
 
   #WordPress image based on Apache
   wordpress:
     depends_on:
-      - my_database
+      - mysql_wordpress
     image: wordpress:latest
     restart: always
     ports:
       - "8000:80"
     environment:
-      WORDPRESS_DB_HOST: my_database:3306
-      WORDPRESS_DB_USER: my_wp_user
-      WORDPRESS_DB_PASSWORD: my_wp_user_password
-      WORDPRESS_DB_NAME: my_wp_database
+      WORDPRESS_DB_HOST: mysql_wordpress:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
     volumes:
       ["./:/var/www/html"]
   phpmyadmin:
     depends_on:
-      - my_database
+      - mysql_wordpress
     image: phpmyadmin/phpmyadmin
+    volumes:
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     restart: always
     ports:
-      - '8080:80'
+      - '8800:80'
     environment:
-      PMA_HOST: my_database
+      PMA_HOST: mysql_wordpress
       MYSQL_ROOT_PASSWORD: admin@123
 volumes:
   mysql: {}
